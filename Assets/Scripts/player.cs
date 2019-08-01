@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class player : MonoBehaviour
 {
-    public float jump = 150f;
+    public float jump = 170f;
     Rigidbody2D rb;
     bool onGround = false;
+    public bool gameOver = false;
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -14,14 +15,25 @@ public class player : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && onGround)
+        if (!gameOver)
         {
-            print("ASDF");
-            rb.AddForce(Vector2.up * jump * Time.deltaTime * rb.mass * rb.gravityScale,ForceMode2D.Impulse);
+            if ((Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.W)) && onGround)
+            {
+                Vector2 force = Vector2.up * jump * Time.deltaTime * rb.mass * rb.gravityScale;
+                if (force.y > 275f || force.y < 225)
+                {
+                    force.y = 250f;
+                }
+                rb.AddForce(force, ForceMode2D.Impulse);
+            }
+            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                rb.AddForce(Vector2.down * jump * Time.deltaTime * rb.mass * rb.gravityScale, ForceMode2D.Impulse);
+            }
         }
-        if(Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+        else
         {
-            rb.AddForce(Vector2.down * jump * Time.deltaTime * rb.mass * rb.gravityScale, ForceMode2D.Impulse);
+            GetComponent<Animator>().enabled = false;
         }
     }
 
@@ -30,6 +42,11 @@ public class player : MonoBehaviour
         if(collision.collider.name == "ground")
         {
             onGround = true;
+        }
+        else                                //for collision with enemies.
+        {
+            gameOver = true;
+            print("Collision detected");
         }
     }
 
